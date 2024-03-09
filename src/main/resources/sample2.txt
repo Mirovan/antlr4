@@ -1,0 +1,5 @@
+Diagram {
+  Aaaa -> Bbbb
+  Bbbb -> Cccc
+  Cccc -> Dddd
+}
