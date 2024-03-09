@@ -16,7 +16,7 @@ public class CustomArchicodeBaseListener extends ArchicodeBaseListener {
     @Override
     public void exitRelation(ArchicodeParser.RelationContext ctx) {
         DiagObject fromObj = findOrCreate(ctx.object(0).ID().getText());
-        DiagObject toObj = new DiagObject(ctx.object(1).ID().getText());
+        DiagObject toObj = findOrCreate(ctx.object(1).ID().getText());
         Relation relation = new Relation(fromObj, toObj, "");
         diagram.getObjects().add(fromObj);
         diagram.getObjects().add(toObj);

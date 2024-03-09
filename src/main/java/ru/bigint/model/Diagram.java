@@ -6,12 +6,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 
 public class Diagram {
-    private Set<DiagObject> objects;
-    private Set<Relation> relations;
+    private Queue<DiagObject> objects;
+    private Queue<Relation> relations;
     private Set<DiagObject> drawed; //Уже отрисованные
 
     private int defaultWidth = 100;
@@ -20,24 +22,24 @@ public class Diagram {
     private int defaultMarginY = 20;
 
     public Diagram() {
-        this.objects = new HashSet<>();
-        this.relations = new HashSet<>();
+        this.objects = new LinkedList<>();
+        this.relations = new LinkedList<>();
         this.drawed = new HashSet<>();
     }
 
-    public Set<DiagObject> getObjects() {
+    public Queue<DiagObject> getObjects() {
         return objects;
     }
 
-    public void setObjects(Set<DiagObject> objects) {
+    public void setObjects(Queue<DiagObject> objects) {
         this.objects = objects;
     }
 
-    public Set<Relation> getRelations() {
+    public Queue<Relation> getRelations() {
         return relations;
     }
 
-    public void setRelations(Set<Relation> relations) {
+    public void setRelations(Queue<Relation> relations) {
         this.relations = relations;
     }
 
@@ -90,7 +92,8 @@ public class Diagram {
     private String drawObj(DiagObject obj, int x, int y, int width, int height) {
         if (!drawed.contains(obj)) {
             drawed.add(obj);
-            return "<rect x=\"" + x + "\" y=\"" + y + "\" width=\"" + width + "\" height=\"" + height + "\" rx=\"15\" style=\"fill:#eee;stroke-width:1;stroke:black\" />\n";
+            return "<rect x=\"" + x + "\" y=\"" + y + "\" width=\"" + width + "\" height=\"" + height + "\" rx=\"15\" style=\"fill:#eee;stroke-width:1;stroke:black\" />\n" +
+                    "<text x=\"" + (x+width/2) + "\" y=\"" + (y+height/2) + "\" dominant-baseline=\"middle\" text-anchor=\"middle\">" + obj.getName() + "</text>    \n";
         }
         return "";
     }

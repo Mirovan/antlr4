@@ -1,5 +1,5 @@
 Diagram {
-  Aaaa -> Bbbb
-  Bbbb -> Cccc
-  Cccc -> Dddd
+  Bbbb -> Aaaa
+  Cccc -> Aaaa
+  Dddd -> Aaaa
 }
