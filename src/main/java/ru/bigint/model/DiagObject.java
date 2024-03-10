@@ -40,5 +40,7 @@ public class DiagObject {
 
     public DiagObject(String name) {
         this.name = name;
+        this.x = 0;
+        this.y = 0;
     }
 }

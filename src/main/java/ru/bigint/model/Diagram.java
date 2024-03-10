@@ -5,9 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 
@@ -51,18 +53,27 @@ public class Diagram {
                 "\n" +
                 "<svg width=\"800\" height=\"600\" xmlns=\"http://www.w3.org/2000/svg\" style=\"border:1px solid #d3d3d3;\">\n\n";
 
+        int x = 0;
+        int y = 0;
         for (var obj : objects) {
             //Связи объекта с дочерними
             List<Relation> objRelations = relations.stream()
                     .filter(item -> item.getFrom().equals(obj))
                     .toList();
 
+            //Находим свободных координаты для вставки объекта
+            int lastY = 0;
+            Optional<DiagObject> lastObjOpt = drawed.stream()
+                    .max(Comparator.comparing(DiagObject::getY));
+            if (lastObjOpt.isPresent()) {
+                lastY = lastObjOpt.get().getY() + defaultHeight + defaultMarginY;
+            }
             //Рисуем сам объект
-            outData += drawObj(obj, 0, 0, defaultWidth, defaultHeight);
+            outData += drawObj(obj, 0, lastY, defaultWidth, defaultHeight);
 
             //Рисуем связи объекта
-            int x = defaultWidth + defaultMarginX;
-            int y = 0;
+            x = defaultWidth + defaultMarginX;
+            y = 0;
             for (var rel : objRelations) {
                 outData += drawObj(rel.getTo(), x, y, defaultWidth, defaultHeight);
                 y += defaultHeight + defaultMarginY;
@@ -92,8 +103,10 @@ public class Diagram {
     private String drawObj(DiagObject obj, int x, int y, int width, int height) {
         if (!drawed.contains(obj)) {
             drawed.add(obj);
+            obj.setX(x);
+            obj.setY(y);
             return "<rect x=\"" + x + "\" y=\"" + y + "\" width=\"" + width + "\" height=\"" + height + "\" rx=\"15\" style=\"fill:#eee;stroke-width:1;stroke:black\" />\n" +
-                    "<text x=\"" + (x+width/2) + "\" y=\"" + (y+height/2) + "\" dominant-baseline=\"middle\" text-anchor=\"middle\">" + obj.getName() + "</text>    \n";
+                    "<text x=\"" + (x + width / 2) + "\" y=\"" + (y + height / 2) + "\" dominant-baseline=\"middle\" text-anchor=\"middle\">" + obj.getName() + "</text>    \n";
         }
         return "";
     }
