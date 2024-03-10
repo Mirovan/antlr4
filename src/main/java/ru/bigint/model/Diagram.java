@@ -14,6 +14,8 @@ import java.util.Queue;
 import java.util.Set;
 
 public class Diagram {
+    Path path = Paths.get("C:\\Users\\Max\\Desktop\\antlr\\out.htm");
+
     private Queue<DiagObject> objects;
     private Queue<Relation> relations;
     private Set<DiagObject> drawed; //Уже отрисованные
@@ -46,51 +48,70 @@ public class Diagram {
     }
 
     public void draw() {
-        String outData = "<!DOCTYPE html>\n" +
-                "<html>\n" +
-                "<body>\n" +
-                "\n" +
-                "\n" +
-                "<svg width=\"800\" height=\"600\" xmlns=\"http://www.w3.org/2000/svg\" style=\"border:1px solid #d3d3d3;\">\n\n";
-
-        int x = 0;
-        int y = 0;
-        for (var obj : objects) {
-            //Связи объекта с дочерними
-            List<Relation> objRelations = relations.stream()
-                    .filter(item -> item.getFrom().equals(obj))
-                    .toList();
-
-            //Находим свободных координаты для вставки объекта
-            int lastY = 0;
-            Optional<DiagObject> lastObjOpt = drawed.stream()
-                    .max(Comparator.comparing(DiagObject::getY));
-            if (lastObjOpt.isPresent()) {
-                lastY = lastObjOpt.get().getY() + defaultHeight + defaultMarginY;
-            }
-            //Рисуем сам объект
-            outData += drawObj(obj, 0, lastY, defaultWidth, defaultHeight);
-
-            //Рисуем связи объекта
-            x = defaultWidth + defaultMarginX;
-            y = 0;
-            for (var rel : objRelations) {
-                outData += drawObj(rel.getTo(), x, y, defaultWidth, defaultHeight);
-                y += defaultHeight + defaultMarginY;
-            }
-        }
-
-        outData += "</svg>\n" +
-                "</body>\n" +
-                "</html>";
-
         try {
-            Path path = Paths.get("C:\\Users\\Max\\Desktop\\antlr\\out.htm");
+            String outData = "<!DOCTYPE html>\n" +
+                    "<html>\n" +
+                    "<body>\n" +
+                    "\n" +
+                    "\n" +
+                    "<svg width=\"800\" height=\"600\" xmlns=\"http://www.w3.org/2000/svg\" style=\"border:1px solid #d3d3d3;\">\n\n";
             Files.write(path, outData.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+            int x = 0;
+            int y = 0;
+            int lastX = 0;
+            int lastY = 0;
+            for (var obj : objects) {
+                //Связи объекта с дочерними
+                List<Relation> objRelations = relations.stream()
+                        .filter(item -> item.getFrom().equals(obj))
+                        .toList();
+
+                //Вставляем объект
+                insertMainObject(obj);
+
+                //Рисуем связи объекта
+                insertChildObjects(obj, objRelations);
+            }
+
+            outData = "</svg>\n" +
+                    "</body>\n" +
+                    "</html>";
+            Files.write(path, outData.getBytes(), StandardOpenOption.APPEND);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    private void insertMainObject(DiagObject obj) {
+        //Находим свободные координаты для вставки объекта на Y-координату
+        //Просматриваем все уже нарисованные объекты, находим самый нижний
+        Optional<DiagObject> lastObjOpt = drawed.stream()
+                .max(Comparator.comparing(
+                        DiagObject::getCoord,
+                        Comparator.comparingInt(Coord::getY)
+                ));
+
+        int lastY = 0;
+        if (lastObjOpt.isPresent()) {
+            lastY = lastObjOpt.get().getCoord().getY() + defaultHeight + defaultMarginY;
+        }
+
+        //Рисуем сам объект
+        drawObj(obj, 0, lastY, defaultWidth, defaultHeight);
+    }
+
+    /**
+     * Отображение дочерних элементов
+     * */
+    private void insertChildObjects(DiagObject obj, List<Relation> objRelations) {
+        //Вставка объектов справа в столбик
+        int x = obj.getCoord().getX() + defaultWidth + defaultMarginX;
+        int y = obj.getCoord().getY();
+        for (var rel : objRelations) {
+            drawObj(rel.getTo(), x, y, defaultWidth, defaultHeight);
+            y += defaultHeight + defaultMarginY;
+        }
     }
 
     /**
@@ -98,16 +119,19 @@ public class Diagram {
      * x
      * y
      * width
-     * heaight
+     * height
      */
-    private String drawObj(DiagObject obj, int x, int y, int width, int height) {
+    private void drawObj(DiagObject obj, int x, int y, int width, int height) {
         if (!drawed.contains(obj)) {
             drawed.add(obj);
-            obj.setX(x);
-            obj.setY(y);
-            return "<rect x=\"" + x + "\" y=\"" + y + "\" width=\"" + width + "\" height=\"" + height + "\" rx=\"15\" style=\"fill:#eee;stroke-width:1;stroke:black\" />\n" +
-                    "<text x=\"" + (x + width / 2) + "\" y=\"" + (y + height / 2) + "\" dominant-baseline=\"middle\" text-anchor=\"middle\">" + obj.getName() + "</text>    \n";
+            obj.setCoord(new Coord(x, y));
+            try {
+                String outData = "<rect x=\"" + x + "\" y=\"" + y + "\" width=\"" + width + "\" height=\"" + height + "\" rx=\"15\" style=\"fill:#eee;stroke-width:1;stroke:black\" />\n" +
+                        "<text x=\"" + (x + width / 2) + "\" y=\"" + (y + height / 2) + "\" dominant-baseline=\"middle\" text-anchor=\"middle\">" + obj.getName() + "</text>    \n";
+                Files.write(path, outData.getBytes(), StandardOpenOption.APPEND);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        return "";
     }
 }

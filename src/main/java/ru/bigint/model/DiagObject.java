@@ -3,23 +3,10 @@ package ru.bigint.model;
 public class DiagObject {
     private String name;
     private String type;
-    private int x;
-    private int y;
+    private Coord coord;
 
-    public int getX() {
-        return x;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
+    public Coord getCoord() {
+        return coord;
     }
 
     public String getName() {
@@ -38,9 +25,11 @@ public class DiagObject {
         this.type = type;
     }
 
+    public void setCoord(Coord coord) {
+        this.coord = coord;
+    }
+
     public DiagObject(String name) {
         this.name = name;
-        this.x = 0;
-        this.y = 0;
     }
 }
