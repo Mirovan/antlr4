@@ -14,7 +14,7 @@ public class Main {
 
         try {
             //Reading the DSL script
-            InputStream is = ClassLoader.getSystemResourceAsStream("sample3.txt");
+            InputStream is = ClassLoader.getSystemResourceAsStream("sample5.txt");
 
             //Loading the DSL script into the ANTLR stream.
             CharStream cs = CharStreams.fromStream(is);
@@ -22,7 +22,6 @@ public class Main {
             //Passing the input to the lexer to create tokens
             ArchicodeLexer lexer = new ArchicodeLexer(cs);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
-
 
             //Passing the tokens to the parser to create the parse trea.
             ArchicodeParser parser = new ArchicodeParser(tokens);
