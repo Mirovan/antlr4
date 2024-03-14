@@ -18,8 +18,8 @@ public class CustomArchicodeBaseListener extends ArchicodeBaseListener {
         DiagObject fromObj = findOrCreate(ctx.object(0).ID().getText());
         DiagObject toObj = findOrCreate(ctx.object(1).ID().getText());
         Relation relation = new Relation(fromObj, toObj, "");
-        diagram.getObjects().add(fromObj);
-        diagram.getObjects().add(toObj);
+        diagram.addObject(fromObj);
+        diagram.addObject(toObj);
         diagram.getRelations().add(relation);
     }
 
