@@ -60,18 +60,14 @@ public class Diagram {
                     "<svg width=\"800\" height=\"600\" xmlns=\"http://www.w3.org/2000/svg\" style=\"border:1px solid #d3d3d3;\">\n\n";
             Files.write(filePath, outData.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
-            //Вставка объектов
+            //Вставка объектов по порядку
+            for (var rel : relations) {
+                insertRelatedObjects(rel.getFrom(), rel.getTo(), Direction.LEFT_TO_RIGHT);
+            }
+
+            //Отрисовка всех объектов
             for (var obj : objects) {
-                //Связи объекта с дочерними
-                List<Relation> objRelations = relations.stream()
-                        .filter(item -> item.getFrom().equals(obj))
-                        .toList();
-
-                //Вставляем объект
-                insertMainObject(obj);
-
-                //Рисуем связи объекта
-                insertChildObjects(obj, objRelations);
+                drawObj(obj, defaultWidth, defaultHeight);
             }
 
             //Вставка соединительных линий
@@ -95,6 +91,37 @@ public class Diagram {
         }
     }
 
+    private void insertRelatedObjects(DiagObject objFrom, DiagObject objTo, Direction direction) {
+        //Если объект не имеет координат - определяем координаты для вставки
+        if (!drawed.contains(objFrom)) {
+            insertObject(objFrom, 0, 0);
+        }
+
+        //Если конечный объект не имеет координат
+        if (!drawed.contains(objTo)) {
+            insertObject(objTo, objFrom.getCoord().getX() + defaultWidth + defaultMarginX, objFrom.getCoord().getY());
+        }
+    }
+
+    private void insertObject(DiagObject obj, int x, int y) {
+        //Находим свободные координаты для вставки объекта на Y-координату
+        //Просматриваем все уже нарисованные объекты, находим самый нижний
+        Optional<DiagObject> lastObjOpt = drawed.stream()
+                .filter(item -> item.getCoord().getX() == x)
+                .max(Comparator.comparing(
+                        DiagObject::getCoord,
+                        Comparator.comparingInt(Coord::getY)
+                ));
+
+        //Вычисляем координаты для вставки объекта
+        if (lastObjOpt.isPresent()) {
+            y = lastObjOpt.get().getCoord().getY() + defaultHeight + defaultMarginY;
+        }
+        obj.setCoord(new Coord(x, y));
+        drawed.add(obj);
+    }
+
+    /*
     private void insertMainObject(DiagObject obj) {
         //Находим свободные координаты для вставки объекта на Y-координату
         //Просматриваем все уже нарисованные объекты, находим самый нижний
@@ -112,10 +139,12 @@ public class Diagram {
         //Рисуем сам объект
         drawObj(obj, 0, lastY, defaultWidth, defaultHeight);
     }
+     */
 
     /**
      * Отображение дочерних элементов
      */
+    /*
     private void insertChildObjects(DiagObject obj, List<Relation> objRelations) {
         //Вставка объектов справа в столбик
         int x = obj.getCoord().getX() + defaultWidth + defaultMarginX;
@@ -125,6 +154,7 @@ public class Diagram {
             y += defaultHeight + defaultMarginY;
         }
     }
+    */
 
     /**
      * Рисование соединительных линий, используется A-star алгоритм и манхеттеновские пути
@@ -246,17 +276,15 @@ public class Diagram {
      * width
      * height
      */
-    private void drawObj(DiagObject obj, int x, int y, int width, int height) {
-        if (!drawed.contains(obj)) {
-            drawed.add(obj);
-            obj.setCoord(new Coord(x, y));
-            try {
-                String outData = "<rect x=\"" + x + "\" y=\"" + y + "\" width=\"" + width + "\" height=\"" + height + "\" rx=\"15\" style=\"fill:#eee;stroke-width:1;stroke:black\" />\n" +
-                        "<text x=\"" + (x + width / 2) + "\" y=\"" + (y + height / 2) + "\" dominant-baseline=\"middle\" text-anchor=\"middle\">" + obj.getName() + "</text>    \n";
-                Files.write(filePath, outData.getBytes(), StandardOpenOption.APPEND);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    private void drawObj(DiagObject obj, int width, int height) {
+        try {
+            int x = obj.getCoord().getX();
+            int y = obj.getCoord().getY();
+            String outData = "<rect x=\"" + x + "\" y=\"" + y + "\" width=\"" + width + "\" height=\"" + height + "\" rx=\"15\" style=\"fill:#eee;stroke-width:1;stroke:black\" />\n" +
+                    "<text x=\"" + (x + width / 2) + "\" y=\"" + (y + height / 2) + "\" dominant-baseline=\"middle\" text-anchor=\"middle\">" + obj.getName() + "</text>    \n";
+            Files.write(filePath, outData.getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
