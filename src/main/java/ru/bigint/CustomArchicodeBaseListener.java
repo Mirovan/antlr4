@@ -20,7 +20,7 @@ public class CustomArchicodeBaseListener extends ArchicodeBaseListener {
         Relation relation = new Relation(fromObj, toObj, "");
         diagram.addObject(fromObj);
         diagram.addObject(toObj);
-        diagram.getRelations().add(relation);
+        diagram.addRelation(relation);
     }
 
     private DiagObject findOrCreate(String text) {

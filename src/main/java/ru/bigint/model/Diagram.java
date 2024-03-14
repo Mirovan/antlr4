@@ -25,6 +25,8 @@ public class Diagram {
     private int defaultHeight = 60;
     private int defaultMarginX = 40;
     private int defaultMarginY = 20;
+    private int defaultArrowWidth = 6;
+    private int defaultArrowLength = 8;
 
     public Diagram() {
         this.objects = new LinkedHashSet<>();
@@ -166,7 +168,15 @@ public class Diagram {
             //Если пришли к финальной точке
             if (node.getCoord().getX() == targetWithMarginX && node.getCoord().getY() == targetWithMarginY) {
                 result.addAll(compressLine(node));
-                result.add(new Coord(relation.getTo().getCoord().getX(), relation.getTo().getCoord().getY() + defaultHeight / 2));
+                //Добавляем финальную точку куда приходит линия к основанию стрелки
+                int finalX = relation.getTo().getCoord().getX() - defaultArrowLength;
+                int finalY = relation.getTo().getCoord().getY() + defaultHeight / 2;
+                result.add(new Coord(finalX, finalY));
+                //Добавление точек для стрелки слева-направо
+                result.add(new Coord(finalX, finalY - defaultArrowWidth / 2));
+                result.add(new Coord(finalX + defaultArrowLength, finalY));
+                result.add(new Coord(finalX, finalY + defaultArrowWidth / 2));
+                result.add(new Coord(finalX, finalY));
                 return result;
             }
 
@@ -202,14 +212,14 @@ public class Diagram {
      * Обновление очереди с приоритетами - точки куда можно пойти
      */
     private void tryStep(PriorityQueue<LineNode> open, Set<Coord> closed, LineNode parentNode, int x, int y) {
-        if (x == 120 && y == 30) {
-            System.out.println("");
-        }
-        //Проверяем что эту точку мы еще не посещали
-        if (!closed.contains(new Coord(x, y))) {
-            //Если точка доступна(не принадлежит объекту) - добавляем в очередь
-            if (isPointAvailable(x, y)) {
-                open.add(new LineNode(new Coord(x, y), parentNode.getCost() + 1, parentNode));
+        //Условно можем идти только по положительны координатам
+        if (x >= 0 && y >= 0) {
+            //Проверяем что эту точку мы еще не посещали
+            if (!closed.contains(new Coord(x, y))) {
+                //Если точка доступна(не принадлежит объекту) - добавляем в очередь
+                if (isPointAvailable(x, y)) {
+                    open.add(new LineNode(new Coord(x, y), parentNode.getCost() + 1, parentNode));
+                }
             }
         }
     }
@@ -230,6 +240,7 @@ public class Diagram {
 
     /**
      * Рисование объекта
+     * obj
      * x
      * y
      * width
@@ -254,5 +265,12 @@ public class Diagram {
      */
     public void addObject(DiagObject obj) {
         objects.add(obj);
+    }
+
+    /**
+     * Добавление связи между диаграмму (не отрисовка)
+     */
+    public void addRelation(Relation relation) {
+        relations.add(relation);
     }
 }
