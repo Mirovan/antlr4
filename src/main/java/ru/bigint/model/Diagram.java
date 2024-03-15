@@ -21,6 +21,8 @@ public class Diagram {
     private Set<Relation> relations;
     private Set<DiagObject> drawed; //Уже отрисованные
 
+    private int zeroX = 100;
+    private int zeroY = 100;
     private int defaultWidth = 100;
     private int defaultHeight = 60;
     private int defaultMarginX = 40;
@@ -62,7 +64,7 @@ public class Diagram {
 
             //Вставка объектов по порядку
             for (var rel : relations) {
-                insertRelatedObjects(rel.getFrom(), rel.getTo(), Direction.LEFT_TO_RIGHT);
+                calculateRelatedObjects(rel);
             }
 
             //Отрисовка всех объектов
@@ -73,7 +75,7 @@ public class Diagram {
             //Вставка соединительных линий
             for (var rel : relations) {
                 //Вычисляем соединительные линии
-                List<Coord> linePath = getRelationLines(rel);
+                List<Coord> linePath = calculateRelationLines(rel);
                 String points = "";
                 for (var coord : linePath) {
                     points += coord.getX() + "," + coord.getY() + " ";
@@ -91,19 +93,43 @@ public class Diagram {
         }
     }
 
-    private void insertRelatedObjects(DiagObject objFrom, DiagObject objTo, Direction direction) {
+    /**
+     * Вставка связанных объектов - вычисление их координат
+     */
+    private void calculateRelatedObjects(Relation relation) {
+        DiagObject objFrom = relation.getFrom();
+        DiagObject objTo = relation.getTo();
+
         //Если объект не имеет координат - определяем координаты для вставки
         if (!drawed.contains(objFrom)) {
-            insertObject(objFrom, 0, 0);
+            calculateObjectCoord(objFrom, zeroX, zeroY);
         }
 
         //Если конечный объект не имеет координат
         if (!drawed.contains(objTo)) {
-            insertObject(objTo, objFrom.getCoord().getX() + defaultWidth + defaultMarginX, objFrom.getCoord().getY());
+            //Определяем координаты куда поставить объект в который входит стрелка исходя из направления стрелки
+            calculateObjectCoord(objTo, objFrom.getCoord().getX() + defaultWidth + defaultMarginX, objFrom.getCoord().getY());
+            /*
+            //слева - справа
+            if (relation.getRelDirectionFrom() == RelationDirection.LEFT && relation.getRelDirectionTo() == RelationDirection.RIGHT) {
+                calculateObjectCoord(objTo, objFrom.getCoord().getX() + defaultWidth + defaultMarginX, objFrom.getCoord().getY());
+            }
+            //слева - сверху
+            else if (relation.getRelDirectionFrom() == RelationDirection.LEFT && relation.getRelDirectionTo() == RelationDirection.TOP) {
+                calculateObjectCoord(objTo, objFrom.getCoord().getX(), objFrom.getCoord().getY() + defaultHeight + defaultMarginY);
+            } else {
+                calculateObjectCoord(objTo, objFrom.getCoord().getX() + defaultWidth + defaultMarginX, objFrom.getCoord().getY());
+            }
+            */
         }
     }
 
-    private void insertObject(DiagObject obj, int x, int y) {
+    /**
+     * obj - вставляемый объект
+     * x - от какой координаты начинаем поиск для вставки
+     * y - от какой координаты начинаем поиск для вставки
+     */
+    private void calculateObjectCoord(DiagObject obj, int x, int y) {
         //Находим свободные координаты для вставки объекта на Y-координату
         //Просматриваем все уже нарисованные объекты, находим самый нижний
         Optional<DiagObject> lastObjOpt = drawed.stream()
@@ -121,45 +147,10 @@ public class Diagram {
         drawed.add(obj);
     }
 
-    /*
-    private void insertMainObject(DiagObject obj) {
-        //Находим свободные координаты для вставки объекта на Y-координату
-        //Просматриваем все уже нарисованные объекты, находим самый нижний
-        Optional<DiagObject> lastObjOpt = drawed.stream()
-                .max(Comparator.comparing(
-                        DiagObject::getCoord,
-                        Comparator.comparingInt(Coord::getY)
-                ));
-
-        int lastY = 0;
-        if (lastObjOpt.isPresent()) {
-            lastY = lastObjOpt.get().getCoord().getY() + defaultHeight + defaultMarginY;
-        }
-
-        //Рисуем сам объект
-        drawObj(obj, 0, lastY, defaultWidth, defaultHeight);
-    }
-     */
-
-    /**
-     * Отображение дочерних элементов
-     */
-    /*
-    private void insertChildObjects(DiagObject obj, List<Relation> objRelations) {
-        //Вставка объектов справа в столбик
-        int x = obj.getCoord().getX() + defaultWidth + defaultMarginX;
-        int y = obj.getCoord().getY();
-        for (var rel : objRelations) {
-            drawObj(rel.getTo(), x, y, defaultWidth, defaultHeight);
-            y += defaultHeight + defaultMarginY;
-        }
-    }
-    */
-
     /**
      * Рисование соединительных линий, используется A-star алгоритм и манхеттеновские пути
      */
-    private List<Coord> getRelationLines(Relation relation) {
+    private List<Coord> calculateRelationLines(Relation relation) {
         //Результирующий массив - путь
         List<Coord> result = new ArrayList<>();
 
@@ -186,6 +177,19 @@ public class Diagram {
         //Конечная точка (с отступом) отходит от объекта влево на расстояние defaultMarginX / 2
         int targetWithMarginX = relation.getTo().getCoord().getX() - defaultMarginX / 2;
         int targetWithMarginY = relation.getTo().getCoord().getY() + defaultHeight / 2;
+        if (relation.getRelDirectionTo() == RelationDirection.LEFT) {
+            targetWithMarginX = relation.getTo().getCoord().getX() - defaultMarginX / 2;
+            targetWithMarginY = relation.getTo().getCoord().getY() + defaultHeight / 2;
+        } else if (relation.getRelDirectionTo() == RelationDirection.TOP) {
+            targetWithMarginX = relation.getTo().getCoord().getX() + defaultWidth / 2;
+            targetWithMarginY = relation.getTo().getCoord().getY() - defaultMarginY / 2;
+        } else if (relation.getRelDirectionTo() == RelationDirection.RIGHT) {
+            targetWithMarginX = relation.getTo().getCoord().getX() + defaultWidth + defaultMarginX / 2;
+            targetWithMarginY = relation.getTo().getCoord().getY() + defaultHeight / 2;
+        } else if (relation.getRelDirectionTo() == RelationDirection.BOTTOM) {
+            targetWithMarginX = relation.getTo().getCoord().getX() + defaultWidth / 2;
+            targetWithMarginY = relation.getTo().getCoord().getY() + defaultHeight + defaultMarginY / 2;
+        }
 
         //Точка для которой начинаем искать путь
         open.add(new LineNode(new Coord(x, y), 0, null));
@@ -198,15 +202,50 @@ public class Diagram {
             //Если пришли к финальной точке
             if (node.getCoord().getX() == targetWithMarginX && node.getCoord().getY() == targetWithMarginY) {
                 result.addAll(compressLine(node));
-                //Добавляем финальную точку куда приходит линия к основанию стрелки
-                int finalX = relation.getTo().getCoord().getX() - defaultArrowLength;
-                int finalY = relation.getTo().getCoord().getY() + defaultHeight / 2;
-                result.add(new Coord(finalX, finalY));
-                //Добавление точек для стрелки слева-направо
-                result.add(new Coord(finalX, finalY - defaultArrowWidth / 2));
-                result.add(new Coord(finalX + defaultArrowLength, finalY));
-                result.add(new Coord(finalX, finalY + defaultArrowWidth / 2));
-                result.add(new Coord(finalX, finalY));
+
+                //Рисуем стрелку к нужной стороне целевого объекта
+                if (relation.getRelDirectionTo() == null || relation.getRelDirectionTo() == RelationDirection.LEFT) {
+                    //Добавляем финальную точку куда приходит линия к основанию стрелки
+                    int finalX = relation.getTo().getCoord().getX() - defaultArrowLength;
+                    int finalY = relation.getTo().getCoord().getY() + defaultHeight / 2;
+                    result.add(new Coord(finalX, finalY));
+                    //Добавление точек для стрелки слева-направо
+                    result.add(new Coord(finalX, finalY - defaultArrowWidth / 2));
+                    result.add(new Coord(finalX + defaultArrowLength, finalY));
+                    result.add(new Coord(finalX, finalY + defaultArrowWidth / 2));
+                    result.add(new Coord(finalX, finalY));
+                } else if (relation.getRelDirectionTo() == RelationDirection.TOP) {
+                    //Добавляем финальную точку куда приходит линия к основанию стрелки
+                    int finalX = relation.getTo().getCoord().getX() + defaultWidth / 2;
+                    int finalY = relation.getTo().getCoord().getY() - defaultArrowLength;
+                    result.add(new Coord(finalX, finalY));
+                    //Добавление точек для стрелки слева-направо
+                    result.add(new Coord(finalX + defaultArrowWidth / 2, finalY));
+                    result.add(new Coord(finalX, finalY + defaultArrowLength));
+                    result.add(new Coord(finalX - defaultArrowWidth / 2, finalY));
+                    result.add(new Coord(finalX, finalY));
+                } else if (relation.getRelDirectionTo() == RelationDirection.RIGHT) {
+                    //Добавляем финальную точку куда приходит линия к основанию стрелки
+                    int finalX = relation.getTo().getCoord().getX() + defaultWidth + defaultArrowLength;
+                    int finalY = relation.getTo().getCoord().getY() + defaultHeight / 2;
+                    result.add(new Coord(finalX, finalY));
+                    //Добавление точек для стрелки слева-направо
+                    result.add(new Coord(finalX, finalY - defaultArrowWidth / 2));
+                    result.add(new Coord(finalX - defaultArrowLength, finalY));
+                    result.add(new Coord(finalX, finalY + defaultArrowWidth / 2));
+                    result.add(new Coord(finalX, finalY));
+                } else if (relation.getRelDirectionTo() == RelationDirection.BOTTOM) {
+                    //Добавляем финальную точку куда приходит линия к основанию стрелки
+                    int finalX = relation.getTo().getCoord().getX() + defaultWidth / 2;
+                    int finalY = relation.getTo().getCoord().getY() + defaultHeight + defaultArrowLength;
+                    result.add(new Coord(finalX, finalY));
+                    //Добавление точек для стрелки слева-направо
+                    result.add(new Coord(finalX - defaultArrowWidth / 2, finalY));
+                    result.add(new Coord(finalX, finalY - defaultArrowLength));
+                    result.add(new Coord(finalX + defaultArrowWidth / 2, finalY));
+                    result.add(new Coord(finalX, finalY));
+                }
+
                 return result;
             }
 

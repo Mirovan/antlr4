@@ -2,6 +2,7 @@ package ru.bigint;
 
 import ru.bigint.model.DiagObject;
 import ru.bigint.model.Diagram;
+import ru.bigint.model.RelationDirection;
 import ru.bigint.model.Relation;
 
 import java.util.Optional;
@@ -15,9 +16,21 @@ public class CustomArchicodeBaseListener extends ArchicodeBaseListener {
 
     @Override
     public void exitRelation(ArchicodeParser.RelationContext ctx) {
-        DiagObject fromObj = findOrCreate(ctx.object(0).ID().getText());
-        DiagObject toObj = findOrCreate(ctx.object(1).ID().getText());
-        Relation relation = new Relation(fromObj, toObj, "");
+        DiagObject fromObj = null;
+        DiagObject toObj = null;
+        RelationDirection relDirectionFrom = null;
+        RelationDirection relDirectionTo = null;
+
+        if (ctx.object().size() == 2) {
+            fromObj = findOrCreate(ctx.object(0).ID().getText());
+            toObj = findOrCreate(ctx.object(1).ID().getText());
+        }
+        if (ctx.relationDirections().direction().size() == 2) {
+            relDirectionFrom = RelationDirection.fromString(ctx.relationDirections().direction(0).getText());
+            relDirectionTo = RelationDirection.fromString(ctx.relationDirections().direction(1).getText());
+        }
+
+        Relation relation = new Relation(fromObj, toObj, relDirectionFrom, relDirectionTo);
         diagram.addObject(fromObj);
         diagram.addObject(toObj);
         diagram.addRelation(relation);
