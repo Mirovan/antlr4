@@ -21,11 +21,12 @@ public class CustomArchicodeBaseListener extends ArchicodeBaseListener {
         RelationDirection relDirectionFrom = null;
         RelationDirection relDirectionTo = null;
 
-        if (ctx.object().size() == 2) {
+        if (ctx.object() != null && ctx.object().size() == 2) {
             fromObj = findOrCreate(ctx.object(0).ID().getText());
             toObj = findOrCreate(ctx.object(1).ID().getText());
         }
-        if (ctx.relationDirections().direction().size() == 2) {
+        if (ctx.relationDirections() != null
+                && ctx.relationDirections().direction().size() == 2) {
             relDirectionFrom = RelationDirection.fromString(ctx.relationDirections().direction(0).getText());
             relDirectionTo = RelationDirection.fromString(ctx.relationDirections().direction(1).getText());
         }

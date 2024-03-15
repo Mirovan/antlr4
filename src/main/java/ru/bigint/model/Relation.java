@@ -10,8 +10,8 @@ public class Relation {
     public Relation(DiagObject from, DiagObject to, RelationDirection relDirectionFrom, RelationDirection relDirectionTo) {
         this.from = from;
         this.to = to;
-        this.relDirectionFrom = relDirectionFrom;
-        this.relDirectionTo = relDirectionTo;
+        this.relDirectionFrom = relDirectionFrom != null ? relDirectionFrom : RelationDirection.RIGHT;
+        this.relDirectionTo = relDirectionTo != null ? relDirectionTo : RelationDirection.LEFT;
     }
 
     public Relation(DiagObject from, DiagObject to) {
