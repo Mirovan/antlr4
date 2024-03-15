@@ -6,6 +6,7 @@ public class Relation {
     private String type;
     private RelationDirection relDirectionFrom;
     private RelationDirection relDirectionTo;
+    private RelationDirection toObjectPriorityPosition;
 
     public Relation(DiagObject from, DiagObject to, RelationDirection relDirectionFrom, RelationDirection relDirectionTo) {
         this.from = from;
@@ -14,9 +15,12 @@ public class Relation {
         this.relDirectionTo = relDirectionTo != null ? relDirectionTo : RelationDirection.LEFT;
     }
 
-    public Relation(DiagObject from, DiagObject to) {
+    public Relation(DiagObject from, DiagObject to, RelationDirection relDirectionFrom, RelationDirection relDirectionTo, RelationDirection toObjectPriorityPosition) {
         this.from = from;
         this.to = to;
+        this.relDirectionFrom = relDirectionFrom != null ? relDirectionFrom : RelationDirection.RIGHT;
+        this.relDirectionTo = relDirectionTo != null ? relDirectionTo : RelationDirection.LEFT;
+        this.toObjectPriorityPosition = toObjectPriorityPosition != null ? toObjectPriorityPosition : RelationDirection.RIGHT;
     }
 
     public DiagObject getFrom() {
@@ -57,5 +61,13 @@ public class Relation {
 
     public void setRelDirectionTo(RelationDirection relDirectionTo) {
         this.relDirectionTo = relDirectionTo;
+    }
+
+    public RelationDirection getToObjectPriorityPosition() {
+        return toObjectPriorityPosition;
+    }
+
+    public void setToObjectPriorityPosition(RelationDirection toObjectPriorityPosition) {
+        this.toObjectPriorityPosition = toObjectPriorityPosition;
     }
 }

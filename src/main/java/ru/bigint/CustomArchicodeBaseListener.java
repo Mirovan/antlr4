@@ -20,6 +20,7 @@ public class CustomArchicodeBaseListener extends ArchicodeBaseListener {
         DiagObject toObj = null;
         RelationDirection relDirectionFrom = null;
         RelationDirection relDirectionTo = null;
+        RelationDirection toObjectPriorityPosition = null;
 
         if (ctx.object() != null && ctx.object().size() == 2) {
             fromObj = findOrCreate(ctx.object(0).ID().getText());
@@ -30,8 +31,11 @@ public class CustomArchicodeBaseListener extends ArchicodeBaseListener {
             relDirectionFrom = RelationDirection.fromString(ctx.relationDirections().direction(0).getText());
             relDirectionTo = RelationDirection.fromString(ctx.relationDirections().direction(1).getText());
         }
+        if (ctx.priorityPosition() != null) {
+            toObjectPriorityPosition = RelationDirection.fromString(ctx.priorityPosition().getText());
+        }
 
-        Relation relation = new Relation(fromObj, toObj, relDirectionFrom, relDirectionTo);
+        Relation relation = new Relation(fromObj, toObj, relDirectionFrom, relDirectionTo, toObjectPriorityPosition);
         diagram.addObject(fromObj);
         diagram.addObject(toObj);
         diagram.addRelation(relation);

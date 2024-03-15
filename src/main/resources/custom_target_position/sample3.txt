@@ -1,0 +1,6 @@
+Diagram {
+  111 ->(left, right) 222(left)
+  111 -> 333(right)
+  111 ->(top, bottom) 444(top)
+  111 ->(bottom, top) 555(bottom)
+}

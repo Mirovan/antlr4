@@ -59,10 +59,10 @@ public class Diagram {
                     "<body>\n" +
                     "\n" +
                     "\n" +
-                    "<svg width=\"800\" height=\"600\" xmlns=\"http://www.w3.org/2000/svg\" style=\"border:1px solid #d3d3d3;\">\n\n";
+                    "<svg width=\"800\" height=\"700\" xmlns=\"http://www.w3.org/2000/svg\" style=\"border:1px solid #d3d3d3;\">\n\n";
             Files.write(filePath, outData.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
-            //Вставка объектов по порядку
+            //Вычисление позиций объектов по порядку
             for (var rel : relations) {
                 calculateRelatedObjects(rel);
             }
@@ -72,10 +72,12 @@ public class Diagram {
                 drawObj(obj, defaultWidth, defaultHeight);
             }
 
-            //Вставка соединительных линий
+            //Вычисление координат соединительных линий и их отрисовка
             for (var rel : relations) {
                 //Вычисляем соединительные линии
                 List<Coord> linePath = calculateRelationLines(rel);
+
+                //отрисовка
                 String points = "";
                 for (var coord : linePath) {
                     points += coord.getX() + "," + coord.getY() + " ";
@@ -97,30 +99,40 @@ public class Diagram {
      * Вставка связанных объектов - вычисление их координат
      */
     private void calculateRelatedObjects(Relation relation) {
-        DiagObject objFrom = relation.getFrom();
-        DiagObject objTo = relation.getTo();
+        DiagObject obj1 = relation.getFrom();
+        DiagObject obj2 = relation.getTo();
 
-        //Если объект не имеет координат - определяем координаты для вставки
-        if (!drawed.contains(objFrom)) {
-            calculateObjectCoord(objFrom, zeroX, zeroY);
+        //Определяем какой объект будем вставлять первым
+        if (relation.getToObjectPriorityPosition() == RelationDirection.LEFT
+                || relation.getToObjectPriorityPosition() == RelationDirection.TOP) {
+            DiagObject temp = obj1;
+            obj1 = obj2;
+            obj2 = temp;
         }
 
-        //Если конечный объект не имеет координат
-        if (!drawed.contains(objTo)) {
-            //Определяем координаты куда поставить объект в который входит стрелка исходя из направления стрелки
-            calculateObjectCoord(objTo, objFrom.getCoord().getX() + defaultWidth + defaultMarginX, objFrom.getCoord().getY());
-            /*
-            //слева - справа
-            if (relation.getRelDirectionFrom() == RelationDirection.LEFT && relation.getRelDirectionTo() == RelationDirection.RIGHT) {
-                calculateObjectCoord(objTo, objFrom.getCoord().getX() + defaultWidth + defaultMarginX, objFrom.getCoord().getY());
+        //Вставка объектов по горизонтали
+        if (relation.getToObjectPriorityPosition() == RelationDirection.RIGHT
+                || relation.getToObjectPriorityPosition() == RelationDirection.LEFT) {
+            //Если объект еще не имеет координат - определяем координаты для вставки начального объекта
+            if (!drawed.contains(obj1)) {
+                calculateObjectCoord(obj1, zeroX, zeroY);
             }
-            //слева - сверху
-            else if (relation.getRelDirectionFrom() == RelationDirection.LEFT && relation.getRelDirectionTo() == RelationDirection.TOP) {
-                calculateObjectCoord(objTo, objFrom.getCoord().getX(), objFrom.getCoord().getY() + defaultHeight + defaultMarginY);
-            } else {
-                calculateObjectCoord(objTo, objFrom.getCoord().getX() + defaultWidth + defaultMarginX, objFrom.getCoord().getY());
+            //Если конечный объект не имеет координат - Определяем координаты куда поставить конечный объект
+            if (!drawed.contains(obj2)) {
+                calculateObjectCoord(obj2, obj1.getCoord().getX() + defaultWidth + defaultMarginX, obj1.getCoord().getY());
             }
-            */
+        }
+        //Вставка объектов по горизонтали
+        else if (relation.getToObjectPriorityPosition() == RelationDirection.TOP
+                || relation.getToObjectPriorityPosition() == RelationDirection.BOTTOM) {
+            //Если объект еще не имеет координат - определяем координаты для вставки начального объекта
+            if (!drawed.contains(obj1)) {
+                calculateObjectCoord(obj1, zeroX, zeroY);
+            }
+            //Если конечный объект не имеет координат - Определяем координаты куда поставить конечный объект
+            if (!drawed.contains(obj2)) {
+                calculateObjectCoord(obj2, obj1.getCoord().getX(), zeroY);
+            }
         }
     }
 

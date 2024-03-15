@@ -1,0 +1,6 @@
+Diagram {
+  Aaaa -> Bbbb(left)
+  Aaaa -> Cccc(right)
+  Aaaa -> Eeee(top)
+  Aaaa -> Dddd(bottom)
+}
