@@ -26,7 +26,7 @@ public class Diagram {
     private int defaultWidth = 100;
     private int defaultHeight = 60;
     private int defaultMarginX = 40;
-    private int defaultMarginY = 20;
+    private int defaultMarginY = 30;
     private int defaultArrowWidth = 6;
     private int defaultArrowLength = 8;
 
@@ -165,18 +165,39 @@ public class Diagram {
         int stepY = defaultMarginY / 2 + defaultHeight / 2;
 
         //1-точка принадлежит объекту
-        int startX = relation.getFrom().getCoord().getX() + defaultWidth;
-        int startY = relation.getFrom().getCoord().getY() + defaultHeight / 2;
+        int startX = 0;
+        int startY = 0;
+        int x = 0;
+        int y = 0;
+        if (relation.getRelDirectionFrom() == RelationDirection.RIGHT) {
+            startX = relation.getFrom().getCoord().getX() + defaultWidth;
+            startY = relation.getFrom().getCoord().getY() + defaultHeight / 2;
+            x = startX + defaultMarginX / 2;
+            y = startY;
+        } else if (relation.getRelDirectionFrom() == RelationDirection.TOP) {
+            startX = relation.getFrom().getCoord().getX() + defaultWidth / 2;
+            startY = relation.getFrom().getCoord().getY();
+            x = startX;
+            y = startY - defaultMarginY / 2;
+        } else if (relation.getRelDirectionFrom() == RelationDirection.LEFT) {
+            startX = relation.getFrom().getCoord().getX();
+            startY = relation.getFrom().getCoord().getY() + defaultHeight / 2;
+            x = startX - defaultMarginX / 2;
+            y = startY;
+        } else if (relation.getRelDirectionFrom() == RelationDirection.BOTTOM) {
+            startX = relation.getFrom().getCoord().getX() + defaultWidth / 2;
+            startY = relation.getFrom().getCoord().getY() + defaultHeight;
+            x = startX;
+            y = startY + defaultMarginY / 2;
+        }
         result.add(new Coord(startX, startY));
 
         //2 точка отходит от объекта вправо на расстояние defaultMarginX / 2
-        int x = startX + defaultMarginX / 2;
-        int y = startY;
         result.add(new Coord(x, y));
 
         //Конечная точка (с отступом) отходит от объекта влево на расстояние defaultMarginX / 2
-        int targetWithMarginX = relation.getTo().getCoord().getX() - defaultMarginX / 2;
-        int targetWithMarginY = relation.getTo().getCoord().getY() + defaultHeight / 2;
+        int targetWithMarginX = 0;
+        int targetWithMarginY = 0;
         if (relation.getRelDirectionTo() == RelationDirection.LEFT) {
             targetWithMarginX = relation.getTo().getCoord().getX() - defaultMarginX / 2;
             targetWithMarginY = relation.getTo().getCoord().getY() + defaultHeight / 2;

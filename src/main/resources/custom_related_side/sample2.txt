@@ -1,0 +1,6 @@
+Diagram {
+  1111 ->(right,top) 2222
+  3333 ->(right,right) 4444
+  5555 ->(right,bottom) 6666
+  7777 ->(right,left) 8888
+}

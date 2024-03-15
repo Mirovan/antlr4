@@ -14,7 +14,7 @@ public class Main {
 
         try {
             //Reading the DSL script
-            InputStream is = ClassLoader.getSystemResourceAsStream("custom_related_side/sample1.txt");
+            InputStream is = ClassLoader.getSystemResourceAsStream("custom_related_side/sample3.txt");
 
             //Loading the DSL script into the ANTLR stream.
             CharStream cs = CharStreams.fromStream(is);

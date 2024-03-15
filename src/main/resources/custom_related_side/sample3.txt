@@ -1,0 +1,6 @@
+Diagram {
+  111 ->(top,top) 222
+  333 ->(right,top) 444
+  555 ->(left,top) 666
+  777 ->(bottom,top) 888
+}
